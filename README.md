@@ -1,3 +1,3 @@
 # fliesentisch
 
-dieses Projekt ist der counter fuer die Fliesentisch Bierstrafen und Punktesystem
+dieses Projekt ist das Punktesystem fuer den Fliesentisch Göttingen
