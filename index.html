@@ -7,15 +7,16 @@
   <style>
     :root {
       color-scheme: light dark;
-      --bg: #f6f7fb;
+      --bg: #f9f8f6;
+      --panel: #f4b342;
+      --user-card: #8f0177;
+      --accent: #de1a58;
+      --text: #1f1b16;
+      --muted: #6b5f56;
       --surface: #ffffff;
-      --surface-2: #f1f3f9;
-      --text: #111827;
-      --muted: #6b7280;
-      --accent: #2563eb;
-      --accent-2: #10b981;
-      --danger: #ef4444;
-      --shadow: 0 10px 30px rgba(15, 23, 42, 0.1);
+      --surface-2: #f5f0ea;
+      --danger: #de1a58;
+      --shadow: 0 10px 30px rgba(25, 15, 35, 0.12);
       --radius: 18px;
       --radius-sm: 12px;
       --gap: 16px;
@@ -24,15 +25,16 @@
 
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg: #0f1117;
-        --surface: #161a23;
-        --surface-2: #1d2230;
-        --text: #f8fafc;
-        --muted: #94a3b8;
-        --accent: #60a5fa;
-        --accent-2: #34d399;
-        --danger: #f87171;
-        --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+        --bg: #120b14;
+        --panel: #f4b342;
+        --user-card: #8f0177;
+        --accent: #de1a58;
+        --text: #f7f2ed;
+        --muted: #c5b8ad;
+        --surface: #1b141f;
+        --surface-2: #2a1f2f;
+        --danger: #de1a58;
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
       }
     }
 
@@ -117,7 +119,7 @@
     }
 
     button.secondary {
-      background: var(--surface-2);
+      background: var(--panel);
       color: var(--text);
     }
 
@@ -161,13 +163,14 @@
     }
 
     .card {
-      background: var(--surface);
+      background: var(--user-card);
       border-radius: var(--radius);
       padding: 18px;
       box-shadow: var(--shadow);
       display: flex;
       flex-direction: column;
       gap: 16px;
+      color: #fff;
     }
 
     .card-header {
@@ -183,7 +186,7 @@
     }
 
     .muted {
-      color: var(--muted);
+      color: rgba(255, 255, 255, 0.78);
       font-size: 0.9rem;
     }
 
@@ -198,8 +201,15 @@
       padding: 10px 0;
     }
 
+    .card .ghost {
+      color: rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+    }
+
     .history {
-      background: var(--surface);
+      background: var(--panel);
       border-radius: var(--radius);
       padding: 18px;
       box-shadow: var(--shadow);
@@ -217,7 +227,7 @@
       align-items: center;
       padding: 12px;
       border-radius: var(--radius-sm);
-      background: var(--surface-2);
+      background: var(--surface);
     }
 
     .history-item strong {
@@ -246,6 +256,7 @@
       color: var(--muted);
       border: 1px dashed var(--surface-2);
       border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.6);
     }
 
     dialog {
@@ -254,7 +265,7 @@
       padding: 0;
       width: min(420px, 90vw);
       box-shadow: var(--shadow);
-      background: var(--surface);
+      background: var(--panel);
       color: var(--text);
     }
 
@@ -379,6 +390,17 @@
     </form>
   </dialog>
 
+  <dialog id="deleteModal">
+    <form method="dialog" class="modal-content" id="deleteForm">
+      <h3>User löschen</h3>
+      <p id="deleteDescription"></p>
+      <div class="modal-actions">
+        <button type="button" class="secondary" data-modal-cancel>Abbrechen</button>
+        <button type="submit" class="danger">Löschen</button>
+      </div>
+    </form>
+  </dialog>
+
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script>
@@ -407,9 +429,9 @@
 
       const now = Date.now();
       const users = [
-        { id: crypto.randomUUID(), name: "Lenny", points: 2, createdAt: now - 100000 },
-        { id: crypto.randomUUID(), name: "Carl", points: -1, createdAt: now - 80000 },
-        { id: crypto.randomUUID(), name: "Max", points: 4, createdAt: now - 60000 }
+        { id: crypto.randomUUID(), name: "Alex", points: 2, createdAt: now - 100000 },
+        { id: crypto.randomUUID(), name: "Sam", points: -1, createdAt: now - 80000 },
+        { id: crypto.randomUUID(), name: "Riley", points: 4, createdAt: now - 60000 }
       ];
 
       const events = [
@@ -534,6 +556,26 @@
         storage.set("fliesentisch_users", users);
         storage.set("fliesentisch_events", events);
         return event;
+      },
+      async deleteUser(userId) {
+        if (USE_REMOTE_API) {
+          const response = await fetch(`/api/users/${userId}`, {
+            method: "DELETE"
+          });
+          if (!response.ok) throw new Error("Remote API error");
+          return response.json();
+        }
+
+        const users = storage.get("fliesentisch_users", []);
+        const events = storage.get("fliesentisch_events", []);
+        const userIndex = users.findIndex((entry) => entry.id === userId);
+        if (userIndex === -1) throw new Error("User not found");
+
+        const [removedUser] = users.splice(userIndex, 1);
+        const remainingEvents = events.filter((entry) => entry.userId !== userId);
+        storage.set("fliesentisch_users", users);
+        storage.set("fliesentisch_events", remainingEvents);
+        return removedUser;
       }
     };
 
@@ -542,7 +584,8 @@
       events: [],
       filter: "",
       pending: null,
-      pendingUndo: null
+      pendingUndo: null,
+      pendingDelete: null
     };
 
     const ui = {
@@ -562,6 +605,9 @@
       undoModal: document.getElementById("undoModal"),
       undoForm: document.getElementById("undoForm"),
       undoDescription: document.getElementById("undoDescription"),
+      deleteModal: document.getElementById("deleteModal"),
+      deleteForm: document.getElementById("deleteForm"),
+      deleteDescription: document.getElementById("deleteDescription"),
       toast: document.getElementById("toast")
     };
 
@@ -617,6 +663,7 @@
               </div>
               <div class="points">${user.points}</div>
             </div>
+            <button type="button" class="ghost" data-action="delete-user" data-user-id="${user.id}">User löschen</button>
             <div class="controls" data-user-id="${user.id}">
               <button type="button" data-action="increment">+</button>
               <button type="button" class="secondary" data-action="decrement">-</button>
@@ -683,6 +730,14 @@
       helpers.openModal(ui.undoModal);
     };
 
+    const handleDeleteUser = (userId) => {
+      const user = state.users.find((entry) => entry.id === userId);
+      if (!user) return;
+      state.pendingDelete = userId;
+      ui.deleteDescription.textContent = `User ${user.name} wirklich löschen? Alle Historien-Einträge werden entfernt.`;
+      helpers.openModal(ui.deleteModal);
+    };
+
     const initEvents = () => {
       ui.searchInput.addEventListener("input", (event) => {
         state.filter = event.target.value;
@@ -699,10 +754,14 @@
       ui.userList.addEventListener("click", (event) => {
         const button = event.target.closest("button[data-action]");
         if (!button) return;
+        const action = button.dataset.action;
+        if (action === "delete-user") {
+          handleDeleteUser(button.dataset.userId);
+          return;
+        }
         const controls = button.closest(".controls");
         if (!controls) return;
         const userId = controls.dataset.userId;
-        const action = button.dataset.action;
         if (action === "increment") handleAdjustPoints(userId, 1);
         if (action === "decrement") handleAdjustPoints(userId, -1);
       });
@@ -744,6 +803,22 @@
         } finally {
           state.pendingUndo = null;
           helpers.closeModal(ui.undoModal);
+        }
+      });
+
+      ui.deleteForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        if (!state.pendingDelete) return;
+        try {
+          await api.deleteUser(state.pendingDelete);
+          await loadData();
+          helpers.showToast("User gelöscht");
+        } catch (error) {
+          console.error(error);
+          helpers.showToast("Fehler beim Löschen", true);
+        } finally {
+          state.pendingDelete = null;
+          helpers.closeModal(ui.deleteModal);
         }
       });
 
