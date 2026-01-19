@@ -7,16 +7,15 @@
   <style>
     :root {
       color-scheme: light dark;
-      --bg: #f9f8f6;
-      --panel: #f4b342;
-      --user-card: #8f0177;
-      --accent: #de1a58;
-      --text: #1f1b16;
-      --muted: #6b5f56;
+      --bg: #f6f7fb;
       --surface: #ffffff;
-      --surface-2: #f5f0ea;
-      --danger: #de1a58;
-      --shadow: 0 10px 30px rgba(25, 15, 35, 0.12);
+      --surface-2: #f1f3f9;
+      --text: #111827;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --accent-2: #10b981;
+      --danger: #ef4444;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.1);
       --radius: 18px;
       --radius-sm: 12px;
       --gap: 16px;
@@ -25,16 +24,15 @@
 
     @media (prefers-color-scheme: dark) {
       :root {
-        --bg: #120b14;
-        --panel: #f4b342;
-        --user-card: #8f0177;
-        --accent: #de1a58;
-        --text: #f7f2ed;
-        --muted: #c5b8ad;
-        --surface: #1b141f;
-        --surface-2: #2a1f2f;
-        --danger: #de1a58;
-        --shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        --bg: #0f1117;
+        --surface: #161a23;
+        --surface-2: #1d2230;
+        --text: #f8fafc;
+        --muted: #94a3b8;
+        --accent: #60a5fa;
+        --accent-2: #34d399;
+        --danger: #f87171;
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
       }
     }
 
@@ -119,7 +117,7 @@
     }
 
     button.secondary {
-      background: var(--panel);
+      background: var(--surface-2);
       color: var(--text);
     }
 
@@ -163,14 +161,13 @@
     }
 
     .card {
-      background: var(--user-card);
+      background: var(--surface);
       border-radius: var(--radius);
       padding: 18px;
       box-shadow: var(--shadow);
       display: flex;
       flex-direction: column;
       gap: 16px;
-      color: #fff;
     }
 
     .card-header {
@@ -186,7 +183,7 @@
     }
 
     .muted {
-      color: rgba(255, 255, 255, 0.78);
+      color: var(--muted);
       font-size: 0.9rem;
     }
 
@@ -202,7 +199,7 @@
     }
 
     .history {
-      background: var(--panel);
+      background: var(--surface);
       border-radius: var(--radius);
       padding: 18px;
       box-shadow: var(--shadow);
@@ -220,7 +217,7 @@
       align-items: center;
       padding: 12px;
       border-radius: var(--radius-sm);
-      background: var(--surface);
+      background: var(--surface-2);
     }
 
     .history-item strong {
@@ -249,7 +246,6 @@
       color: var(--muted);
       border: 1px dashed var(--surface-2);
       border-radius: var(--radius);
-      background: rgba(255, 255, 255, 0.6);
     }
 
     dialog {
@@ -258,7 +254,7 @@
       padding: 0;
       width: min(420px, 90vw);
       box-shadow: var(--shadow);
-      background: var(--panel);
+      background: var(--surface);
       color: var(--text);
     }
 
