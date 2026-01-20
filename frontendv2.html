@@ -488,35 +488,15 @@
       ensureSeed() {
         if (localStorage.getItem(STORAGE_KEYS.users)) return;
         const seedUsers = [
-          { id: helpers.uid(), name: "Lena", points: 3, createdAt: helpers.now() },
-          { id: helpers.uid(), name: "Murat", points: 7, createdAt: helpers.now() },
-          { id: helpers.uid(), name: "Jana", points: 1, createdAt: helpers.now() },
+          { id: helpers.uid(), name: "Lenny", points: 0, createdAt: helpers.now() },
+          { id: helpers.uid(), name: "Carl", points: 0, createdAt: helpers.now() },
+          { id: helpers.uid(), name: "Olli", points: 0, createdAt: helpers.now() },
+          { id: helpers.uid(), name: "Max", points: 0, createdAt: helpers.now() },
+          { id: helpers.uid(), name: "Linus", points: 0, createdAt: helpers.now() },
+          { id: helpers.uid(), name: "Luis", points: 0, createdAt: helpers.now() },
         ];
         const seedEvents = [
-          {
-            id: helpers.uid(),
-            userId: seedUsers[0].id,
-            userName: seedUsers[0].name,
-            delta: 2,
-            note: "Spontaner Snack",
-            createdAt: helpers.now(),
-          },
-          {
-            id: helpers.uid(),
-            userId: seedUsers[1].id,
-            userName: seedUsers[1].name,
-            delta: 5,
-            note: "Verspätung",
-            createdAt: helpers.now(),
-          },
-          {
-            id: helpers.uid(),
-            userId: seedUsers[2].id,
-            userName: seedUsers[2].name,
-            delta: -1,
-            note: "Ausgleich",
-            createdAt: helpers.now(),
-          },
+          #empty
         ];
         localStorage.setItem(STORAGE_KEYS.users, JSON.stringify(seedUsers));
         localStorage.setItem(STORAGE_KEYS.events, JSON.stringify(seedEvents));
@@ -757,7 +737,7 @@
             <h2>User hinzufügen</h2>
             <label class="form-field">
               Name
-              <input type="text" data-autofocus id="newUserName" placeholder="z.B. Alex" />
+              <input type="text" data-autofocus id="newUserName" placeholder="Name" />
             </label>
             <label class="form-field">
               Initiale Punkte
