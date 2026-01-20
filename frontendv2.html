@@ -488,9 +488,9 @@
       ensureSeed() {
         if (localStorage.getItem(STORAGE_KEYS.users)) return;
         const seedUsers = [
-          { id: helpers.uid(), name: "Lenny", points: 0, createdAt: helpers.now() },
-          { id: helpers.uid(), name: "Carl", points: 0, createdAt: helpers.now() },
-          { id: helpers.uid(), name: "Olli", points: 0, createdAt: helpers.now() },
+          { id: helpers.uid(), name: "Lenny", points: 2, createdAt: helpers.now() },
+          { id: helpers.uid(), name: "Carl", points: 5, createdAt: helpers.now() },
+          { id: helpers.uid(), name: "Olli", points: -1, createdAt: helpers.now() },
           { id: helpers.uid(), name: "Max", points: 0, createdAt: helpers.now() },
           { id: helpers.uid(), name: "Linus", points: 0, createdAt: helpers.now() },
           { id: helpers.uid(), name: "Luis", points: 0, createdAt: helpers.now() },
@@ -501,7 +501,7 @@
             userId: seedUsers[0].id,
             userName: seedUsers[0].name,
             delta: 2,
-            note: "Spontaner Snack",
+            note: "Verspätung",
             createdAt: helpers.now(),
           },
           {
