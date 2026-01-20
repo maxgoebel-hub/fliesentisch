@@ -496,6 +496,30 @@
           { id: helpers.uid(), name: "Luis", points: 0, createdAt: helpers.now() },
         ];
         const seedEvents = [
+          {
+            id: helpers.uid(),
+            userId: seedUsers[0].id,
+            userName: seedUsers[0].name,
+            delta: 2,
+            note: "Spontaner Snack",
+            createdAt: helpers.now(),
+          },
+          {
+            id: helpers.uid(),
+            userId: seedUsers[1].id,
+            userName: seedUsers[1].name,
+            delta: 5,
+            note: "Verspätung",
+            createdAt: helpers.now(),
+          },
+          {
+            id: helpers.uid(),
+            userId: seedUsers[2].id,
+            userName: seedUsers[2].name,
+            delta: -1,
+            note: "Ausgleich",
+            createdAt: helpers.now(),
+          },
         ];
         localStorage.setItem(STORAGE_KEYS.users, JSON.stringify(seedUsers));
         localStorage.setItem(STORAGE_KEYS.events, JSON.stringify(seedEvents));
