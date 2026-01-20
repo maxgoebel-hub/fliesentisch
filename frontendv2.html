@@ -1,1 +1,902 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fliesentisch-Strafpunkte</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #ffffff;
+      --surface: #f6f7fb;
+      --surface-strong: #eff1f6;
+      --border: #d9deea;
+      --text: #1c2230;
+      --muted: #5f6b85;
+      --primary: #2f6dff;
+      --primary-dark: #1d4fd8;
+      --danger: #e5484d;
+      --shadow: 0 10px 30px rgba(25, 35, 58, 0.08);
+      --radius: 16px;
+    }
 
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    .page {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 32px 20px 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    header {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    header h1 {
+      font-size: clamp(1.8rem, 1.2rem + 2vw, 2.6rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .toolbar-left {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex: 1 1 320px;
+    }
+
+    .search {
+      flex: 1;
+      position: relative;
+    }
+
+    .search input {
+      width: 100%;
+      padding: 12px 14px 12px 40px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      font-size: 1rem;
+    }
+
+    .search span {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 12px;
+      padding: 10px 16px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--primary);
+      color: #fff;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      box-shadow: 0 8px 20px rgba(47, 109, 255, 0.2);
+    }
+
+    .btn:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .btn.secondary {
+      background: var(--surface-strong);
+      color: var(--text);
+      box-shadow: none;
+      border: 1px solid var(--border);
+    }
+
+    .btn.ghost {
+      background: transparent;
+      color: var(--primary);
+      border: 1px solid var(--border);
+      box-shadow: none;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+      gap: 24px;
+    }
+
+    @media (max-width: 960px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+    }
+
+    .user-card {
+      position: relative;
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 18px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 160px;
+    }
+
+    .user-card h3 {
+      font-size: 1.1rem;
+    }
+
+    .points {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .delete-user {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+
+    .delete-user:hover {
+      color: var(--danger);
+    }
+
+    .history {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 18px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-height: 720px;
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow: auto;
+      padding-right: 6px;
+    }
+
+    .history-item {
+      background: var(--surface-strong);
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      border: 1px solid var(--border);
+    }
+
+    .history-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    .history-delta {
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .history-actions {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .empty {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(13, 20, 36, 0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 50;
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+    }
+
+    .modal {
+      background: #fff;
+      border-radius: var(--radius);
+      padding: 24px;
+      width: min(500px, 100%);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .modal h2 {
+      font-size: 1.4rem;
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 0.95rem;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    textarea {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+      background: var(--surface);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .quick-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .quick-buttons button {
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface-strong);
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .toast {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      background: #fff;
+      border-radius: 12px;
+      padding: 12px 16px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(12px);
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      z-index: 60;
+    }
+
+    .toast.show {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: var(--surface-strong);
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .note {
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <h1>Fliesentisch-Strafpunkte</h1>
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <div class="search">
+            <span>🔍</span>
+            <input id="searchInput" type="text" placeholder="User suchen" />
+          </div>
+          <span class="badge" id="userCount">0 User</span>
+        </div>
+        <button class="btn" id="addUserBtn">User hinzufügen</button>
+      </div>
+    </header>
+
+    <div class="layout">
+      <section>
+        <div class="card-grid" id="userList"></div>
+      </section>
+
+      <aside class="history">
+        <div>
+          <h2>Verlauf</h2>
+          <p class="note">Neueste zuerst · Undo möglich</p>
+        </div>
+        <div class="history-list" id="historyList"></div>
+      </aside>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true"></div>
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const USE_REMOTE_API = false;
+    const STORAGE_KEYS = {
+      users: "fliesentisch_users",
+      events: "fliesentisch_events",
+    };
+
+    const state = {
+      users: [],
+      events: [],
+      filter: "",
+      modal: null,
+    };
+
+    const helpers = {
+      uid() {
+        return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      },
+      now() {
+        return new Date().toISOString();
+      },
+      formatDate(isoString) {
+        return new Date(isoString).toLocaleString("de-DE", {
+          dateStyle: "medium",
+          timeStyle: "short",
+        });
+      },
+      clampNumber(value, min = 1) {
+        const parsed = Number.parseInt(value, 10);
+        if (Number.isNaN(parsed)) return min;
+        return Math.max(parsed, min);
+      },
+    };
+
+    const api = {
+      async listUsers() {
+        if (USE_REMOTE_API) {
+          const response = await fetch("/api/users");
+          if (!response.ok) throw new Error("Fehler beim Laden der User");
+          return response.json();
+        }
+        return storage.getUsers();
+      },
+      async createUser(name, initialPoints) {
+        if (USE_REMOTE_API) {
+          const response = await fetch("/api/users", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, initialPoints }),
+          });
+          if (!response.ok) throw new Error("Fehler beim Erstellen");
+          return response.json();
+        }
+        return storage.createUser(name, initialPoints);
+      },
+      async deleteUser(userId) {
+        if (USE_REMOTE_API) {
+          const response = await fetch(`/api/users/${userId}`, { method: "DELETE" });
+          if (!response.ok) throw new Error("Fehler beim Löschen");
+          return response.json();
+        }
+        return storage.deleteUser(userId);
+      },
+      async adjustPoints(userId, delta, note) {
+        if (USE_REMOTE_API) {
+          const response = await fetch(`/api/users/${userId}/points`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ delta, note }),
+          });
+          if (!response.ok) throw new Error("Fehler beim Speichern");
+          return response.json();
+        }
+        return storage.adjustPoints(userId, delta, note);
+      },
+      async listEvents() {
+        if (USE_REMOTE_API) {
+          const response = await fetch("/api/events");
+          if (!response.ok) throw new Error("Fehler beim Laden der Historie");
+          return response.json();
+        }
+        return storage.getEvents();
+      },
+      async undoEvent(eventId) {
+        if (USE_REMOTE_API) {
+          const response = await fetch(`/api/events/${eventId}/undo`, { method: "POST" });
+          if (!response.ok) throw new Error("Fehler beim Undo");
+          return response.json();
+        }
+        return storage.undoEvent(eventId);
+      },
+    };
+
+    const storage = {
+      ensureSeed() {
+        if (localStorage.getItem(STORAGE_KEYS.users)) return;
+        const seedUsers = [
+          { id: helpers.uid(), name: "Lena", points: 3, createdAt: helpers.now() },
+          { id: helpers.uid(), name: "Murat", points: 7, createdAt: helpers.now() },
+          { id: helpers.uid(), name: "Jana", points: 1, createdAt: helpers.now() },
+        ];
+        const seedEvents = [
+          {
+            id: helpers.uid(),
+            userId: seedUsers[0].id,
+            userName: seedUsers[0].name,
+            delta: 2,
+            note: "Spontaner Snack",
+            createdAt: helpers.now(),
+          },
+          {
+            id: helpers.uid(),
+            userId: seedUsers[1].id,
+            userName: seedUsers[1].name,
+            delta: 5,
+            note: "Verspätung",
+            createdAt: helpers.now(),
+          },
+          {
+            id: helpers.uid(),
+            userId: seedUsers[2].id,
+            userName: seedUsers[2].name,
+            delta: -1,
+            note: "Ausgleich",
+            createdAt: helpers.now(),
+          },
+        ];
+        localStorage.setItem(STORAGE_KEYS.users, JSON.stringify(seedUsers));
+        localStorage.setItem(STORAGE_KEYS.events, JSON.stringify(seedEvents));
+      },
+      getUsers() {
+        return JSON.parse(localStorage.getItem(STORAGE_KEYS.users) || "[]");
+      },
+      saveUsers(users) {
+        localStorage.setItem(STORAGE_KEYS.users, JSON.stringify(users));
+      },
+      getEvents() {
+        return JSON.parse(localStorage.getItem(STORAGE_KEYS.events) || "[]");
+      },
+      saveEvents(events) {
+        localStorage.setItem(STORAGE_KEYS.events, JSON.stringify(events));
+      },
+      createUser(name, initialPoints) {
+        const users = storage.getUsers();
+        const newUser = {
+          id: helpers.uid(),
+          name,
+          points: initialPoints,
+          createdAt: helpers.now(),
+        };
+        users.push(newUser);
+        storage.saveUsers(users);
+        return newUser;
+      },
+      deleteUser(userId) {
+        const users = storage.getUsers().filter((user) => user.id !== userId);
+        const events = storage.getEvents().filter((event) => event.userId !== userId);
+        storage.saveUsers(users);
+        storage.saveEvents(events);
+        return { success: true };
+      },
+      adjustPoints(userId, delta, note) {
+        const users = storage.getUsers();
+        const userIndex = users.findIndex((user) => user.id === userId);
+        if (userIndex === -1) throw new Error("User nicht gefunden");
+        users[userIndex].points += delta;
+        const event = {
+          id: helpers.uid(),
+          userId,
+          userName: users[userIndex].name,
+          delta,
+          note,
+          createdAt: helpers.now(),
+        };
+        const events = [event, ...storage.getEvents()];
+        storage.saveUsers(users);
+        storage.saveEvents(events);
+        return event;
+      },
+      undoEvent(eventId) {
+        const events = storage.getEvents();
+        const eventIndex = events.findIndex((event) => event.id === eventId);
+        if (eventIndex === -1) throw new Error("Event nicht gefunden");
+        const [event] = events.splice(eventIndex, 1);
+        const users = storage.getUsers();
+        const userIndex = users.findIndex((user) => user.id === event.userId);
+        if (userIndex !== -1) {
+          users[userIndex].points -= event.delta;
+        }
+        storage.saveUsers(users);
+        storage.saveEvents(events);
+        return event;
+      },
+    };
+
+    const ui = {
+      init() {
+        storage.ensureSeed();
+        ui.bindEvents();
+        ui.refresh();
+      },
+      async refresh() {
+        try {
+          const [users, events] = await Promise.all([api.listUsers(), api.listEvents()]);
+          state.users = users;
+          state.events = events;
+          ui.render();
+        } catch (error) {
+          ui.toast("Fehler beim Laden", "error");
+        }
+      },
+      bindEvents() {
+        const searchInput = document.getElementById("searchInput");
+        searchInput.addEventListener("input", (event) => {
+          state.filter = event.target.value;
+          ui.render();
+        });
+
+        document.getElementById("addUserBtn").addEventListener("click", () => {
+          ui.openModal(ui.modalTemplates.addUser());
+        });
+
+        document.getElementById("userList").addEventListener("click", (event) => {
+          const card = event.target.closest(".user-card");
+          if (!card) return;
+          const userId = card.dataset.id;
+
+          if (event.target.matches(".delete-user")) {
+            const user = state.users.find((item) => item.id === userId);
+            if (user) ui.openModal(ui.modalTemplates.deleteUser(user));
+            return;
+          }
+
+          if (event.target.matches("[data-action='add']")) {
+            const user = state.users.find((item) => item.id === userId);
+            if (user) ui.openModal(ui.modalTemplates.adjustPoints(user, 1));
+            return;
+          }
+
+          if (event.target.matches("[data-action='remove']")) {
+            const user = state.users.find((item) => item.id === userId);
+            if (user) ui.openModal(ui.modalTemplates.adjustPoints(user, -1));
+          }
+        });
+
+        document.getElementById("historyList").addEventListener("click", (event) => {
+          const item = event.target.closest(".history-item");
+          if (!item) return;
+          if (event.target.matches("[data-action='undo']")) {
+            const eventId = item.dataset.id;
+            const entry = state.events.find((ev) => ev.id === eventId);
+            if (entry) ui.openModal(ui.modalTemplates.undoEvent(entry));
+          }
+        });
+
+        const backdrop = document.getElementById("modalBackdrop");
+        backdrop.addEventListener("click", (event) => {
+          if (event.target === backdrop) ui.closeModal("Abgebrochen");
+        });
+
+        document.addEventListener("keydown", (event) => {
+          if (!state.modal) return;
+          if (event.key === "Escape") {
+            event.preventDefault();
+            ui.closeModal("Abgebrochen");
+          }
+          if (event.key === "Enter") {
+            const primary = state.modal.querySelector("[data-primary]");
+            if (primary && document.activeElement?.tagName !== "TEXTAREA") {
+              event.preventDefault();
+              primary.click();
+            }
+          }
+        });
+      },
+      render() {
+        const list = document.getElementById("userList");
+        const filtered = state.users.filter((user) =>
+          user.name.toLowerCase().includes(state.filter.trim().toLowerCase())
+        );
+
+        list.innerHTML = "";
+        if (filtered.length === 0) {
+          list.innerHTML = '<p class="empty">Keine User gefunden.</p>';
+        } else {
+          filtered.forEach((user) => {
+            const card = document.createElement("article");
+            card.className = "user-card";
+            card.dataset.id = user.id;
+            card.innerHTML = `
+              <button class="delete-user" aria-label="User löschen">×</button>
+              <h3>${user.name}</h3>
+              <div class="points">${user.points}</div>
+              <div class="card-actions">
+                <button class="btn" data-action="add">+ Punkte</button>
+                <button class="btn secondary" data-action="remove">- Punkte</button>
+              </div>
+            `;
+            list.appendChild(card);
+          });
+        }
+
+        const userCount = document.getElementById("userCount");
+        userCount.textContent = `${state.users.length} User`;
+
+        const historyList = document.getElementById("historyList");
+        historyList.innerHTML = "";
+        if (state.events.length === 0) {
+          historyList.innerHTML = '<p class="empty">Noch keine Änderungen.</p>';
+        } else {
+          state.events
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+            .forEach((event) => {
+              const item = document.createElement("div");
+              item.className = "history-item";
+              item.dataset.id = event.id;
+              const sign = event.delta > 0 ? "+" : "";
+              item.innerHTML = `
+                <div class="history-meta">
+                  <span>${helpers.formatDate(event.createdAt)}</span>
+                  <span>${event.userName}</span>
+                </div>
+                <div class="history-delta">${sign}${event.delta} Punkte</div>
+                ${event.note ? `<div class="note">${event.note}</div>` : ""}
+                <div class="history-actions">
+                  <button class="btn ghost" data-action="undo">Undo</button>
+                </div>
+              `;
+              historyList.appendChild(item);
+            });
+        }
+      },
+      openModal(content) {
+        const backdrop = document.getElementById("modalBackdrop");
+        backdrop.innerHTML = "";
+        backdrop.appendChild(content);
+        backdrop.classList.add("active");
+        backdrop.setAttribute("aria-hidden", "false");
+        state.modal = content;
+        const autofocus = content.querySelector("[data-autofocus]");
+        if (autofocus) autofocus.focus();
+      },
+      closeModal(message) {
+        const backdrop = document.getElementById("modalBackdrop");
+        backdrop.classList.remove("active");
+        backdrop.setAttribute("aria-hidden", "true");
+        backdrop.innerHTML = "";
+        state.modal = null;
+        if (message) ui.toast(message);
+      },
+      toast(message, type = "success") {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.style.borderColor = type === "error" ? "#f5b5b5" : "var(--border)";
+        toast.classList.add("show");
+        clearTimeout(ui.toastTimer);
+        ui.toastTimer = setTimeout(() => toast.classList.remove("show"), 2500);
+      },
+      modalTemplates: {
+        addUser() {
+          const modal = document.createElement("div");
+          modal.className = "modal";
+          modal.innerHTML = `
+            <h2>User hinzufügen</h2>
+            <label class="form-field">
+              Name
+              <input type="text" data-autofocus id="newUserName" placeholder="z.B. Alex" />
+            </label>
+            <label class="form-field">
+              Initiale Punkte
+              <input type="number" id="newUserPoints" value="0" min="0" />
+            </label>
+            <div class="modal-actions">
+              <button class="btn secondary" data-action="cancel">Abbrechen</button>
+              <button class="btn" data-primary data-action="save">Speichern</button>
+            </div>
+          `;
+          modal.querySelector("[data-action='cancel']").addEventListener("click", () => {
+            ui.closeModal("Abgebrochen");
+          });
+          modal.querySelector("[data-action='save']").addEventListener("click", async () => {
+            const nameInput = modal.querySelector("#newUserName");
+            const pointsInput = modal.querySelector("#newUserPoints");
+            const name = nameInput.value.trim();
+            if (!name) {
+              ui.toast("Name darf nicht leer sein", "error");
+              nameInput.focus();
+              return;
+            }
+            if (state.users.some((user) => user.name.toLowerCase() === name.toLowerCase())) {
+              ui.toast("Name existiert bereits", "error");
+              nameInput.focus();
+              return;
+            }
+            const points = Number(pointsInput.value) || 0;
+            try {
+              await api.createUser(name, points);
+              await ui.refresh();
+              ui.closeModal("Gespeichert");
+            } catch (error) {
+              ui.toast("Fehler beim Speichern", "error");
+            }
+          });
+          return modal;
+        },
+        adjustPoints(user, direction) {
+          const modal = document.createElement("div");
+          modal.className = "modal";
+          modal.innerHTML = `
+            <h2>Punktestand für ${user.name} ändern</h2>
+            <label class="form-field">
+              Anzahl
+              <input type="number" id="pointsAmount" value="1" min="1" data-autofocus />
+            </label>
+            <div class="quick-buttons">
+              ${[1, 2, 5, 10]
+                .map((value) => `<button type="button" data-quick="${value}">${value}</button>`)
+                .join("")}
+            </div>
+            <label class="form-field">
+              Notiz (optional)
+              <textarea id="pointsNote" placeholder="Kurznotiz"></textarea>
+            </label>
+            <div class="modal-actions">
+              <button class="btn secondary" data-action="cancel">Abbrechen</button>
+              <button class="btn" data-primary data-action="save">Speichern</button>
+            </div>
+          `;
+          const amountInput = modal.querySelector("#pointsAmount");
+          modal.querySelectorAll("[data-quick]").forEach((button) => {
+            button.addEventListener("click", () => {
+              amountInput.value = button.dataset.quick;
+            });
+          });
+          modal.querySelector("[data-action='cancel']").addEventListener("click", () => {
+            ui.closeModal("Abgebrochen");
+          });
+          modal.querySelector("[data-action='save']").addEventListener("click", async () => {
+            const amount = helpers.clampNumber(amountInput.value, 1);
+            const note = modal.querySelector("#pointsNote").value.trim();
+            const delta = amount * direction;
+            try {
+              await api.adjustPoints(user.id, delta, note);
+              await ui.refresh();
+              ui.closeModal("Gespeichert");
+            } catch (error) {
+              ui.toast("Fehler beim Speichern", "error");
+            }
+          });
+          return modal;
+        },
+        deleteUser(user) {
+          const modal = document.createElement("div");
+          modal.className = "modal";
+          modal.innerHTML = `
+            <h2>User löschen</h2>
+            <p>User <strong>${user.name}</strong> wirklich löschen? Punktestand und Historie werden entfernt.</p>
+            <div class="modal-actions">
+              <button class="btn secondary" data-action="cancel">Abbrechen</button>
+              <button class="btn" data-primary data-action="delete">Löschen</button>
+            </div>
+          `;
+          modal.querySelector("[data-action='cancel']").addEventListener("click", () => {
+            ui.closeModal("Abgebrochen");
+          });
+          modal.querySelector("[data-action='delete']").addEventListener("click", async () => {
+            try {
+              await api.deleteUser(user.id);
+              await ui.refresh();
+              ui.closeModal("Gespeichert");
+            } catch (error) {
+              ui.toast("Fehler beim Löschen", "error");
+            }
+          });
+          return modal;
+        },
+        undoEvent(entry) {
+          const modal = document.createElement("div");
+          modal.className = "modal";
+          modal.innerHTML = `
+            <h2>Eintrag rückgängig machen</h2>
+            <p>Änderung (${entry.delta > 0 ? "+" : ""}${entry.delta}) für <strong>${entry.userName}</strong> zurücknehmen?</p>
+            <div class="modal-actions">
+              <button class="btn secondary" data-action="cancel">Abbrechen</button>
+              <button class="btn" data-primary data-action="undo">Undo</button>
+            </div>
+          `;
+          modal.querySelector("[data-action='cancel']").addEventListener("click", () => {
+            ui.closeModal("Abgebrochen");
+          });
+          modal.querySelector("[data-action='undo']").addEventListener("click", async () => {
+            try {
+              await api.undoEvent(entry.id);
+              await ui.refresh();
+              ui.closeModal("Gespeichert");
+            } catch (error) {
+              ui.toast("Fehler beim Undo", "error");
+            }
+          });
+          return modal;
+        },
+      },
+    };
+
+    ui.init();
+  </script>
+</body>
+</html>
